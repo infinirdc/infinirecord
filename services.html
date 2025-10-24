@@ -1,0 +1,133 @@
+<!doctype html>
+<!-- services.html - Page des services Infinirecord -->
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Services — Infinirecord</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <div class="site">
+      <header class="site-header" role="banner">
+        <div class="container header-inner">
+          <a class="logo" href="index.html">Infinirecord</a>
+          <button class="burger" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="main-nav">
+            <span class="burger-lines" aria-hidden="true"></span>
+          </button>
+          <nav id="main-nav" class="main-nav" role="navigation">
+            <ul>
+              <li><a href="index.html">Accueil</a></li>
+              <li><a href="studio.html">Le Studio</a></li>
+              <li><a href="services.html">Services</a></li>
+              <li><a href="shop.html">Boutique</a></li>
+              <li><a href="#contact">Contact</a></li>
+            </ul>
+          </nav>
+        </div>
+      </header>
+
+      <main class="container">
+        <section class="hero-small">
+          <h1>Nos Services de Production</h1>
+          <p class="lead">Des solutions complètes pour chaque étape de votre projet.</p>
+        </section>
+
+        <section class="service-block">
+          <div class="media"><img src="https://images.unsplash.com/photo-1511379938547-c1f69419868d?q=80&w=1200&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder" alt="Enregistrement"></div>
+          <div class="content">
+            <h2>Enregistrement / Prise de son</h2>
+            <p>Sessions adaptées : confort de l'artiste, isolation, coaching vocal, choix de micros haut de gamme. Tarif selon la configuration et la durée.</p>
+          </div>
+        </section>
+
+        <section class="service-block alt">
+          <div class="content">
+            <h2>Mixage Audio</h2>
+            <p>Mixages réalisés par des ingénieurs expérimentés, avec comparaisons A/B et révisions incluses. Nous fournissons des stems et bus personnalisés.</p>
+            <div class="compare">
+              <button class="btn play-sample" data-src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3">Play Avant</button>
+              <button class="btn play-sample" data-src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3">Play Après</button>
+            </div>
+          </div>
+          <div class="media"><img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=1200&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder" alt="Mixing"></div>
+        </section>
+
+        <section class="service-block">
+          <div class="media"><img src="https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=1200&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder" alt="Mastering"></div>
+          <div class="content">
+            <h2>Mastering</h2>
+            <p>Mastering stéréo et mastering par stems. Optimisation loudness, compatibilité streaming, et exports pour radio.</p>
+          </div>
+        </section>
+
+        <section class="service-block alt">
+          <div class="content">
+            <h2>Production & Beatmaking</h2>
+            <p>Création de beats sur-mesure, arrangements, co-production. Droits et licences clairs et modulables.</p>
+          </div>
+          <div class="media"><img src="https://images.unsplash.com/photo-1507874457470-272b3c8d8ee2?q=80&w=1200&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder" alt="Production"></div>
+        </section>
+
+        <section class="pricing">
+          <h2>Tarifs (exemples)</h2>
+          <div class="grid grid-3">
+            <div class="price-card">
+              <h3>Mixage par piste</h3>
+              <p class="price">€80</p>
+              <p>Révisions : 2 incluses</p>
+            </div>
+            <div class="price-card">
+              <h3>Mastering Stéréo</h3>
+              <p class="price">€60</p>
+              <p>Optimisation loudness & formats</p>
+            </div>
+            <div class="price-card">
+              <h3>Session Studio / heure</h3>
+              <p class="price">€50</p>
+              <p>Accès à la régie et équipement</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="contact" id="contact">
+          <h2>Contact / Devis</h2>
+          <p>Pour un devis, contactez-nous via contact@infinirecord.example ou par le formulaire de contact.</p>
+        </section>
+
+      </main>
+
+      <footer class="site-footer">
+        <div class="container footer-inner">
+          <div class="footer-col">
+            <a class="logo footer-logo" href="index.html">Infinirecord</a>
+            <p class="slogan">Sculptez votre son. Partagez votre histoire.</p>
+          </div>
+          <div class="footer-col">
+            <h4>Liens rapides</h4>
+            <ul class="footer-links">
+              <li><a href="index.html">Accueil</a></li>
+              <li><a href="studio.html">Le Studio</a></li>
+              <li><a href="services.html">Services</a></li>
+              <li><a href="shop.html">Boutique</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h4>Réseaux</h4>
+            <div class="socials">
+              <a href="#" aria-label="Spotify" class="social">Spotify</a>
+              <a href="#" aria-label="Instagram" class="social">Instagram</a>
+              <a href="#" aria-label="YouTube" class="social">YouTube</a>
+            </div>
+          </div>
+        </div>
+        <div class="container footer-bottom">
+          <small>© <span id="year-services"></span> Infinirecord — Tous droits réservés.</small>
+        </div>
+      </footer>
+
+    </div>
+    <script src="script.js" defer></script>
+  </body>
+</html>

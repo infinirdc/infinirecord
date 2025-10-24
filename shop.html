@@ -1,0 +1,190 @@
+<!doctype html>
+<!-- shop.html - Boutique Infinirecord -->
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Boutique — Infinirecord</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <div class="site">
+      <header class="site-header" role="banner">
+        <div class="container header-inner">
+          <a class="logo" href="index.html">Infinirecord</a>
+          <button class="burger" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="main-nav">
+            <span class="burger-lines" aria-hidden="true"></span>
+          </button>
+          <nav id="main-nav" class="main-nav" role="navigation">
+            <ul>
+              <li><a href="index.html">Accueil</a></li>
+              <li><a href="studio.html">Le Studio</a></li>
+              <li><a href="services.html">Services</a></li>
+              <li><a href="shop.html">Boutique</a></li>
+              <li><a href="#contact">Contact</a></li>
+            </ul>
+          </nav>
+        </div>
+      </header>
+
+      <main class="shop-page">
+        <div class="container">
+          <section class="shop-header">
+            <h1>Boutique Infinirecord</h1>
+            <div class="shop-filters">
+              <select id="category-filter">
+                <option value="all">Toutes les catégories</option>
+                <option value="sample-packs">Sample Packs</option>
+                <option value="beats">Beats</option>
+                <option value="services">Services</option>
+              </select>
+              <select id="sort-filter">
+                <option value="newest">Plus récents</option>
+                <option value="price-low">Prix croissant</option>
+                <option value="price-high">Prix décroissant</option>
+              </select>
+            </div>
+          </section>
+
+          <section class="products-grid">
+            <!-- Sample Pack Example -->
+            <article class="product-card" data-category="sample-packs">
+              <div class="product-image">
+                <img src="assets/images/sample-pack-urban.webp" alt="Sample Pack Urban" loading="lazy">
+                <span class="product-category">Sample Pack</span>
+              </div>
+              <div class="product-info">
+                <h3>Urban Vibes Vol. 1</h3>
+                <p class="product-description">Collection de sons urbains premium pour vos productions.</p>
+                <div class="audio-player" data-src="assets/audio/urban-vibes-preview.mp3">
+                  <button class="play-btn">▶</button>
+                  <div class="progress-bar">
+                    <div class="progress"></div>
+                  </div>
+                  <span class="time current-time">0:00</span>
+                </div>
+                <div class="product-footer">
+                  <span class="price">29.99 €</span>
+                  <button class="add-to-cart" data-id="urban-vibes-1">Ajouter au panier</button>
+                </div>
+              </div>
+            </article>
+
+            <!-- Beat Example -->
+            <article class="product-card" data-category="beats">
+              <div class="product-image">
+                <img src="assets/images/beat-midnight.webp" alt="Beat Trap" loading="lazy">
+                <span class="product-category">Beat</span>
+              </div>
+              <div class="product-info">
+                <h3>Midnight Dreams</h3>
+                <p class="product-description">Beat trap mélodique avec ambiance nocturne.</p>
+                <div class="audio-player" data-src="assets/audio/midnight-dreams-preview.mp3">
+                  <button class="play-btn">▶</button>
+                  <div class="progress-bar">
+                    <div class="progress"></div>
+                  </div>
+                  <span class="time current-time">0:00</span>
+                </div>
+                <div class="product-footer">
+                  <span class="price">49.99 €</span>
+                  <button class="add-to-cart" data-id="midnight-dreams">Ajouter au panier</button>
+                </div>
+              </div>
+            </article>
+          </section>
+        </div>
+      </main>
+
+      <main class="container shop-page">
+        <aside class="filters">
+          <h2>Filtres</h2>
+          <form id="filters-form">
+            <div class="filter-group">
+              <h3>Type</h3>
+              <label><input type="checkbox" name="type" value="beats" checked> Beats</label>
+              <label><input type="checkbox" name="type" value="samples" checked> Sample Packs</label>
+              <label><input type="checkbox" name="type" value="merch"> Merch</label>
+            </div>
+
+            <div class="filter-group">
+              <h3>Genre</h3>
+              <label><input type="checkbox" name="genre" value="hiphop" checked> Hip-Hop</label>
+              <label><input type="checkbox" name="genre" value="edm"> EDM</label>
+              <label><input type="checkbox" name="genre" value="pop"> Pop</label>
+            </div>
+          </form>
+        </aside>
+
+        <section class="products">
+          <h1>Boutique : Beats & Sample Packs</h1>
+          <div class="product-grid">
+            <article class="product" data-type="beats" data-genre="hiphop">
+              <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=800&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder" alt="Beat Sunset Drive">
+              <h3>Beat 'Sunset Drive'</h3>
+              <audio controls preload="none">
+                <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+              </audio>
+              <p class="price">24.99€</p>
+              <button class="btn add-to-cart">Ajouter au panier</button>
+            </article>
+
+            <article class="product" data-type="samples" data-genre="edm">
+              <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=800&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder" alt="Sample Pack Vol1">
+              <h3>Sample Pack Vol.1</h3>
+              <audio controls preload="none">
+                <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" type="audio/mpeg">
+              </audio>
+              <p class="price">19.99€</p>
+              <button class="btn add-to-cart">Ajouter au panier</button>
+            </article>
+
+            <article class="product" data-type="beats" data-genre="pop">
+              <img src="https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?q=80&w=800&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder" alt="Beat Ethereal">
+              <h3>Licence Beat 'Ethereal'</h3>
+              <audio controls preload="none">
+                <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3" type="audio/mpeg">
+              </audio>
+              <p class="price">29.99€</p>
+              <button class="btn add-to-cart">Ajouter au panier</button>
+            </article>
+          </div>
+        </section>
+
+      </main>
+
+      <footer class="site-footer">
+        <div class="container footer-inner">
+          <div class="footer-col">
+            <a class="logo footer-logo" href="index.html">Infinirecord</a>
+            <p class="slogan">Sculptez votre son. Partagez votre histoire.</p>
+          </div>
+          <div class="footer-col">
+            <h4>Liens rapides</h4>
+            <ul class="footer-links">
+              <li><a href="index.html">Accueil</a></li>
+              <li><a href="studio.html">Le Studio</a></li>
+              <li><a href="services.html">Services</a></li>
+              <li><a href="shop.html">Boutique</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h4>Réseaux</h4>
+            <div class="socials">
+              <a href="#" aria-label="Spotify" class="social">Spotify</a>
+              <a href="#" aria-label="Instagram" class="social">Instagram</a>
+              <a href="#" aria-label="YouTube" class="social">YouTube</a>
+            </div>
+          </div>
+        </div>
+        <div class="container footer-bottom">
+          <small>© <span id="year-shop"></span> Infinirecord — Tous droits réservés.</small>
+        </div>
+      </footer>
+
+    </div>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <script src="script.js" defer></script>
+  </body>
+</html>

@@ -1,0 +1,228 @@
+<!doctype html>
+<!--
+	index.html - Page d'accueil pour Infinirecord
+	Mobile-first, dark theme, sections: hero, présentation, services, portfolio, boutique
+-->
+<html lang="fr">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Infinirecord — L'excellence sonore</title>
+		<!-- Google Fonts -->
+		<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+		<link rel="stylesheet" href="style.css">
+		<meta name="description" content="Infinirecord — Studio de production musicale : enregistrement, mixage, mastering, beats et sample packs.">
+	</head>
+	<body>
+		<!-- Site wrapper -->
+		<div class="site">
+
+			<!-- Header (réutilisable) -->
+			<header class="site-header" role="banner">
+				<div class="container header-inner">
+					<a class="logo" href="index.html" aria-label="Infinirecord Home">Infinirecord</a>
+					<button class="burger" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="main-nav">
+						<span class="burger-lines" aria-hidden="true"></span>
+					</button>
+					<nav id="main-nav" class="main-nav" role="navigation">
+						<ul>
+							<li><a href="index.html">Accueil</a></li>
+							<li><a href="studio.html">Le Studio</a></li>
+							<li><a href="services.html">Services</a></li>
+							<li><a href="shop.html">Boutique</a></li>
+							<li><a href="#contact">Contact</a></li>
+						</ul>
+					</nav>
+					<div class="header-actions">
+						<button class="cart" aria-label="Voir le panier">🛒 <span class="cart-count">0</span></button>
+					</div>
+				</div>
+			</header>
+
+			<!-- Main content -->
+			<main>
+
+				<!-- Hero -->
+				<section class="hero" aria-label="Hero - Infinirecord">
+					<div class="hero-media" role="img" aria-hidden="true"></div>
+					<div class="hero-content container">
+						<h1>Infinirecord : L'excellence sonore à votre portée.</h1>
+						<p class="hero-sub">Production, Mixage, Mastering. Donnez vie à votre musique.</p>
+						<p>
+							<a class="btn btn-primary" href="services.html">Découvrir nos services</a>
+							<a class="btn btn-ghost" href="studio.html">Visiter le studio</a>
+						</p>
+					</div>
+				</section>
+
+				<!-- Présentation courte -->
+				<section class="presentation container" id="presentation">
+					<div class="grid grid-2">
+						<div>
+							<h2>Le Studio</h2>
+							<p>Infinirecord est un studio professionnel dédié à la production musicale moderne. Que vous soyez un artiste solo ou un collectif, notre équipe vous accompagne de la création au mastering final.</p>
+							<p><a href="studio.html" class="link">En savoir plus sur le studio →</a></p>
+						</div>
+						<figure class="studio-image" aria-hidden="true">
+							<!-- Image depuis Unsplash (placeholder) -->
+							<img src="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=1200&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder" alt="Salle de studio"/>
+						</figure>
+					</div>
+				</section>
+
+				<!-- Services Phares -->
+				<section class="services container">
+					<h2>Nos Prestations</h2>
+					<div class="cards grid grid-3">
+						<article class="card">
+							<div class="card-icon">🎤</div>
+							<h3>Enregistrement</h3>
+							<p>Prise de son professionnelle pour voix et instruments avec microphones haut de gamme.</p>
+							<a class="card-link" href="services.html">Voir les détails →</a>
+						</article>
+
+						<article class="card">
+							<div class="card-icon">🎛️</div>
+							<h3>Mixage</h3>
+							<p>Mixages sur mesure, références A/B, traitement analogique et plugins premium.</p>
+							<a class="card-link" href="services.html">Voir les détails →</a>
+						</article>
+
+						<article class="card">
+							<div class="card-icon">🔊</div>
+							<h3>Mastering</h3>
+							<p>Mastering stéréo & stem pour un rendu professionnel et compatible radio/streaming.</p>
+							<a class="card-link" href="services.html">Voir les détails →</a>
+						</article>
+					</div>
+				</section>
+
+				<!-- Portfolio -->
+				<section class="portfolio container" id="portfolio">
+					<h2>Nos dernières productions</h2>
+					<div class="tracks grid grid-3">
+						<article class="track">
+							<img class="cover" src="https://images.unsplash.com/photo-1511379938547-c1f69419868d?q=80&w=800&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder" alt="Cover 1" />
+							<div class="track-meta">
+								<strong>Echoes of Night</strong>
+								<span>Artist — Lune</span>
+								<audio controls preload="none">
+									<source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+									Votre navigateur ne supporte pas l'audio.
+								</audio>
+							</div>
+						</article>
+
+						<article class="track">
+							<img class="cover" src="https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?q=80&w=800&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder" alt="Cover 2" />
+							<div class="track-meta">
+								<strong>Neon Drive</strong>
+								<span>Artist — Vega</span>
+								<audio controls preload="none">
+									<source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" type="audio/mpeg">
+								</audio>
+							</div>
+						</article>
+
+						<article class="track">
+							<img class="cover" src="https://images.unsplash.com/photo-1507874457470-272b3c8d8ee2?q=80&w=800&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder" alt="Cover 3" />
+							<div class="track-meta">
+								<strong>Analog Dreams</strong>
+								<span>Artist — Sol</span>
+								<audio controls preload="none">
+									<source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3" type="audio/mpeg">
+								</audio>
+							</div>
+						</article>
+					</div>
+				</section>
+
+				<!-- Boutique aperçu -->
+				<section class="shop-preview container">
+					<h2>Notre Boutique</h2>
+					<div class="grid grid-3">
+						<article class="product-card">
+							<img src="https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=800&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder" alt="Sample Pack Vol 1"/>
+							<h3>Sample Pack Vol.1</h3>
+							<p class="price">19.99€</p>
+							<p><a class="btn btn-sm" href="shop.html">Voir le produit</a></p>
+						</article>
+
+						<article class="product-card">
+							<img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=800&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder" alt="Beat Ethereal"/>
+							<h3>Licence Beat 'Ethereal'</h3>
+							<p class="price">29.99€</p>
+							<p><a class="btn btn-sm" href="shop.html">Voir le produit</a></p>
+						</article>
+
+						<article class="product-card">
+							<img src="https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?q=80&w=800&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder" alt="Licence Beat Sunset"/>
+							<h3>Beat 'Sunset Drive'</h3>
+							<p class="price">24.99€</p>
+							<p><a class="btn btn-sm" href="shop.html">Voir le produit</a></p>
+						</article>
+					</div>
+				</section>
+
+				<!-- Contact / newsletter -->
+				<section class="contact container" id="contact">
+					<div class="grid grid-2 contact-grid">
+						<div>
+							<h2>Contact / Devis</h2>
+							<p>Pour un devis personnalisé ou une réservation, écrivez-nous via contact@infinirecord.example ou utilisez le formulaire ci-dessous.</p>
+						</div>
+						<form id="newsletter-form" class="newsletter" novalidate>
+							<label for="newsletter-email">Inscrivez-vous à la newsletter</label>
+							<div class="newsletter-row">
+								<input id="newsletter-email" name="email" type="email" placeholder="votre@email.com" required>
+								<button class="btn" type="submit">S'inscrire</button>
+							</div>
+							<p class="form-note">Nous n'envoyons que des mises à jour pertinentes — pas de spam.</p>
+						</form>
+					</div>
+				</section>
+
+			</main>
+
+			<!-- Footer (réutilisable) -->
+			<footer class="site-footer">
+				<div class="container footer-inner">
+					<div class="footer-col">
+						<a class="logo footer-logo" href="index.html">Infinirecord</a>
+						<p class="slogan">Sculptez votre son. Partagez votre histoire.</p>
+					</div>
+					<div class="footer-col">
+						<h4>Liens rapides</h4>
+						<ul class="footer-links">
+							<li><a href="index.html">Accueil</a></li>
+							<li><a href="studio.html">Le Studio</a></li>
+							<li><a href="services.html">Services</a></li>
+							<li><a href="shop.html">Boutique</a></li>
+						</ul>
+					</div>
+					<div class="footer-col">
+						<h4>Réseaux & Newsletter</h4>
+						<div class="socials">
+							<a href="#" aria-label="Spotify" class="social">Spotify</a>
+							<a href="#" aria-label="Instagram" class="social">Instagram</a>
+							<a href="#" aria-label="YouTube" class="social">YouTube</a>
+						</div>
+						<form id="footer-newsletter" class="footer-newsletter" novalidate>
+							<label for="footer-email" class="visually-hidden">Email</label>
+							<input id="footer-email" type="email" placeholder="Votre email" required>
+							<button class="btn" type="submit">S'inscrire</button>
+						</form>
+					</div>
+				</div>
+				<div class="container footer-bottom">
+					<small>© <span id="year"></span> Infinirecord — Tous droits réservés.</small>
+				</div>
+			</footer>
+
+		</div>
+
+		<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+		<script src="script.js" defer></script>
+	</body>
+</html>
