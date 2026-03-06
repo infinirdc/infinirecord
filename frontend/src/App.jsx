@@ -7,7 +7,7 @@ import logoWhite from './assets/logo-white.svg';
 
 import { auth, db } from './firebase';
 import { onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from 'firebase/auth';
-import { collection, getDocs, doc, getDoc, setDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, getDoc, setDoc, addDoc, query, where } from 'firebase/firestore';
 
 // --- CONTEXT: PANIER, RECHERCHE & AUTH ---
 const AppContext = createContext();
@@ -19,15 +19,25 @@ const AppProvider = ({ children }) => {
   const [isSearchActive, setIsSearchActive] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
+  const [userData, setUserData] = useState(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         setIsAuthenticated(true);
         setCurrentUser(user);
+        try {
+          const docSnap = await getDoc(doc(db, "users", user.uid));
+          if (docSnap.exists()) {
+            setUserData(docSnap.data());
+          }
+        } catch (e) {
+          console.error("Erreur roles user data :", e);
+        }
       } else {
         setIsAuthenticated(false);
         setCurrentUser(null);
+        setUserData(null);
       }
     });
     return () => unsubscribe();
@@ -42,10 +52,12 @@ const AppProvider = ({ children }) => {
     setCart(cart.filter((_, index) => index !== indexToRemove));
   };
 
+  const clearCart = () => setCart([]);
+
   const cartTotal = cart.reduce((total, item) => total + item.price, 0);
 
   return (
-    <AppContext.Provider value={{ cart, addToCart, removeFromCart, isCartOpen, setIsCartOpen, cartTotal, searchQuery, setSearchQuery, isSearchActive, setIsSearchActive, isAuthenticated, currentUser }}>
+    <AppContext.Provider value={{ cart, setCart, clearCart, addToCart, removeFromCart, isCartOpen, setIsCartOpen, cartTotal, searchQuery, setSearchQuery, isSearchActive, setIsSearchActive, isAuthenticated, currentUser, userData }}>
       {children}
     </AppContext.Provider>
   );
@@ -107,7 +119,7 @@ export const INITIAL_ARTISTS = [
 // --- COMPONENTS ---
 
 const Navbar = () => {
-  const { cart, setIsCartOpen, searchQuery, setSearchQuery, isSearchActive, setIsSearchActive } = useContext(AppContext);
+  const { cart, setIsCartOpen, searchQuery, setSearchQuery, isSearchActive, setIsSearchActive, isAuthenticated } = useContext(AppContext);
 
   const handleSearchToggle = (e) => {
     e.preventDefault();
@@ -200,7 +212,55 @@ const Navbar = () => {
 };
 
 const CartSidebar = () => {
-  const { cart, removeFromCart, isCartOpen, setIsCartOpen, cartTotal } = useContext(AppContext);
+  const { cart, removeFromCart, clearCart, isCartOpen, setIsCartOpen, cartTotal, isAuthenticated, currentUser } = useContext(AppContext);
+  const [checkoutStep, setCheckoutStep] = useState('cart'); // 'cart', 'checkout', 'success'
+  const [paymentMethod, setPaymentMethod] = useState('mpesa'); // 'mpesa', 'airtel', 'card'
+  const [phone, setPhone] = useState('');
+  const [isProcessing, setIsProcessing] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!isCartOpen) {
+      setTimeout(() => setCheckoutStep('cart'), 300);
+    }
+  }, [isCartOpen]);
+
+  const handleCheckoutClick = () => {
+    if (!isAuthenticated) {
+      setIsCartOpen(false);
+      navigate('/auth');
+    } else {
+      setCheckoutStep('checkout');
+    }
+  };
+
+  const handlePaymentSubmit = async (e) => {
+    e.preventDefault();
+    setIsProcessing(true);
+
+    // Simulation d'attente réseau pour API de Paiement (ex: Stripe ou FlexPay)
+    setTimeout(async () => {
+      try {
+        await addDoc(collection(db, "orders"), {
+          userId: currentUser.uid,
+          userEmail: currentUser.email,
+          items: cart,
+          total: cartTotal,
+          paymentMethod: paymentMethod,
+          status: 'paid',
+          createdAt: new Date()
+        });
+
+        setIsProcessing(false);
+        setCheckoutStep('success');
+        clearCart();
+      } catch (err) {
+        console.error("Erreur de paiement Firebase", err);
+        setIsProcessing(false);
+        alert("Une erreur est survenue lors de l'enregistrement de la commande.");
+      }
+    }, 2500); // 2.5 secondes de simu
+  };
 
   if (!isCartOpen) return null;
 
@@ -213,42 +273,105 @@ const CartSidebar = () => {
         exit={{ x: '100%' }}
         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
         className="cart-sidebar"
+        style={{ display: 'flex', flexDirection: 'column' }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
-          <h2 style={{ fontSize: '2rem' }}>Mon Panier</h2>
+          <h2 style={{ fontSize: '2rem' }}>{checkoutStep === 'cart' ? 'Mon Panier' : checkoutStep === 'checkout' ? 'Paiement' : 'Confirmation'}</h2>
           <button onClick={() => setIsCartOpen(false)} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: 'white', cursor: 'pointer', padding: '0.5rem', borderRadius: '50%' }}>
             <X size={24} />
           </button>
         </div>
 
-        <div style={{ flex: 1, overflowY: 'auto', paddingRight: '1rem' }}>
-          {cart.length === 0 ? (
-            <div style={{ textAlign: 'center', marginTop: '4rem', opacity: 0.5 }}>
-              <ShoppingBag size={48} style={{ marginBottom: '1rem' }} />
-              <p className="text-muted">Votre panier est tristement vide.</p>
-            </div>
-          ) : (
-            cart.map((item, index) => (
-              <div key={index} className="cart-item">
-                <div className="cart-item-info">
-                  <h4>{item.name}</h4>
-                  <p className="cart-item-price">{item.price.toLocaleString()} FC</p>
-                </div>
-                <button onClick={() => removeFromCart(index)} style={{ background: 'rgba(244, 63, 94, 0.1)', border: 'none', color: 'var(--secondary-color)', cursor: 'pointer', width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Trash2 size={18} />
-                </button>
+        {checkoutStep === 'cart' && (
+          <div style={{ flex: 1, overflowY: 'auto', paddingRight: '1rem', display: 'flex', flexDirection: 'column' }}>
+            {cart.length === 0 ? (
+              <div style={{ textAlign: 'center', marginTop: '4rem', opacity: 0.5 }}>
+                <ShoppingBag size={48} style={{ marginBottom: '1rem' }} />
+                <p className="text-muted">Votre panier est tristement vide.</p>
               </div>
-            ))
-          )}
-        </div>
+            ) : (
+              <>
+                <div style={{ flex: 1 }}>
+                  {cart.map((item, index) => (
+                    <div key={index} className="cart-item">
+                      <div className="cart-item-info">
+                        <h4>{item.name}</h4>
+                        <p className="cart-item-price">{item.price.toLocaleString()} FC</p>
+                      </div>
+                      <button onClick={() => removeFromCart(index)} style={{ background: 'rgba(244, 63, 94, 0.1)', border: 'none', color: 'var(--secondary-color)', cursor: 'pointer', width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                <div style={{ marginTop: 'auto', paddingTop: '2rem', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.4rem', fontWeight: '800', marginBottom: '2rem', fontFamily: 'Outfit' }}>
+                    <span>Total:</span>
+                    <span className="text-gradient">{cartTotal.toLocaleString()} FC</span>
+                  </div>
+                  <button className="btn-primary" onClick={handleCheckoutClick} style={{ width: '100%', padding: '1rem', fontSize: '1.2rem' }}>Paiement Sécurisé</button>
+                </div>
+              </>
+            )}
+          </div>
+        )}
 
-        {cart.length > 0 && (
-          <div style={{ marginTop: 'auto', paddingTop: '2rem', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.4rem', fontWeight: '800', marginBottom: '2rem', fontFamily: 'Outfit' }}>
-              <span>Total:</span>
-              <span className="text-gradient">{cartTotal.toLocaleString()} FC</span>
+        {checkoutStep === 'checkout' && (
+          <form onSubmit={handlePaymentSubmit} style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+            <div style={{ flex: 1 }}>
+              <p className="text-muted" style={{ marginBottom: '2rem' }}>Choisissez votre méthode de paiement pour régler <strong>{cartTotal.toLocaleString()} FC</strong></p>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2rem' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem', background: paymentMethod === 'mpesa' ? 'rgba(109, 40, 217, 0.2)' : 'rgba(255,255,255,0.05)', border: `1px solid ${paymentMethod === 'mpesa' ? 'var(--primary-color)' : 'transparent'}`, borderRadius: '15px', cursor: 'pointer' }}>
+                  <input type="radio" name="payment" value="mpesa" checked={paymentMethod === 'mpesa'} onChange={(e) => setPaymentMethod(e.target.value)} style={{ margin: 0 }} />
+                  <div>
+                    <h4 style={{ margin: 0, fontSize: '1.1rem' }}>M-Pesa</h4>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Paiement mobile sécurisé</span>
+                  </div>
+                </label>
+
+                <label style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem', background: paymentMethod === 'airtel' ? 'rgba(244, 63, 94, 0.2)' : 'rgba(255,255,255,0.05)', border: `1px solid ${paymentMethod === 'airtel' ? 'var(--secondary-color)' : 'transparent'}`, borderRadius: '15px', cursor: 'pointer' }}>
+                  <input type="radio" name="payment" value="airtel" checked={paymentMethod === 'airtel'} onChange={(e) => setPaymentMethod(e.target.value)} style={{ margin: 0 }} />
+                  <div>
+                    <h4 style={{ margin: 0, fontSize: '1.1rem' }}>Airtel Money</h4>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Via Airtel DRC</span>
+                  </div>
+                </label>
+
+                <label style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem', background: paymentMethod === 'card' ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.05)', border: `1px solid ${paymentMethod === 'card' ? 'white' : 'transparent'}`, borderRadius: '15px', cursor: 'pointer' }}>
+                  <input type="radio" name="payment" value="card" checked={paymentMethod === 'card'} onChange={(e) => setPaymentMethod(e.target.value)} style={{ margin: 0 }} />
+                  <CreditCard size={20} />
+                  <div>
+                    <h4 style={{ margin: 0, fontSize: '1.1rem' }}>Carte Bancaire</h4>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Stripe / Visa / Mastercard</span>
+                  </div>
+                </label>
+              </div>
+
+              {paymentMethod !== 'card' && (
+                <div style={{ marginBottom: '2rem' }}>
+                  <label className="form-label" style={{ marginBottom: '0.5rem', display: 'block' }}>Numéro de téléphone</label>
+                  <input type="tel" className="form-control" placeholder="+243 XXX XXX XXX" value={phone} onChange={(e) => setPhone(e.target.value)} required />
+                </div>
+              )}
             </div>
-            <button className="btn-primary" style={{ width: '100%', padding: '1rem', fontSize: '1.2rem' }}>Paiement Sécurisé</button>
+
+            <div style={{ marginTop: 'auto', paddingTop: '2rem', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+              <button type="submit" className="btn-primary" disabled={isProcessing} style={{ width: '100%', padding: '1rem', fontSize: '1.2rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem' }}>
+                {isProcessing ? 'Traitement en cours...' : `Payer ${cartTotal.toLocaleString()} FC`}
+              </button>
+            </div>
+          </form>
+        )}
+
+        {checkoutStep === 'success' && (
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
+            <div style={{ background: 'rgba(16, 185, 129, 0.1)', padding: '2rem', borderRadius: '50%', marginBottom: '2rem' }}>
+              <CheckCircle2 size={64} color="#10b981" />
+            </div>
+            <h3 style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>Paiement Réussi !</h3>
+            <p className="text-muted" style={{ fontSize: '1.1rem', marginBottom: '3rem', maxWidth: '300px' }}>Votre commande a été confirmée. Vous pouvez retrouver les détails dans votre espace membre.</p>
+            <button className="btn-secondary" onClick={() => setIsCartOpen(false)} style={{ width: '100%' }}>Continuer la navigation</button>
           </div>
         )}
       </motion.div>
@@ -782,8 +905,8 @@ const PortailPro = () => {
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
-  const { isAuthenticated, currentUser } = useContext(AppContext);
-  const [userData, setUserData] = useState(null);
+  const { isAuthenticated, currentUser, userData } = useContext(AppContext);
+  const [orders, setOrders] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -792,12 +915,20 @@ const Dashboard = () => {
       if (!isAuthenticated && !currentUser) {
         navigate('/auth');
       } else if (currentUser) {
-        // Fetch les infos utilisateur additionnelles (nom, rôle) depuis Firestore
-        getDoc(doc(db, "users", currentUser.uid)).then((docSnap) => {
-          if (docSnap.exists()) {
-            setUserData(docSnap.data());
+        // Fetch historique d'achat personnel
+        const fetchOrders = async () => {
+          try {
+            const q = query(collection(db, "orders"), where("userId", "==", currentUser.uid));
+            const querySnapshot = await getDocs(q);
+            const userOrders = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            // Trier par date la plus récente
+            userOrders.sort((a, b) => b.createdAt.toDate() - a.createdAt.toDate());
+            setOrders(userOrders);
+          } catch (e) {
+            console.error("Erreur récupération historique d'achat", e);
           }
-        });
+        };
+        fetchOrders();
       }
     }, 1500);
     return () => clearTimeout(timeout);
@@ -842,9 +973,11 @@ const Dashboard = () => {
             <button className={`dashboard-menu-item ${activeTab === 'settings' ? 'active' : ''}`} onClick={() => setActiveTab('settings')}>
               <Settings size={20} /> Compte & Sécurité
             </button>
-            <button className={`dashboard-menu-item ${activeTab === 'admin' ? 'active' : ''}`} onClick={() => setActiveTab('admin')} style={{ color: 'var(--primary-color)' }}>
-              <Settings size={20} /> Panel Admin
-            </button>
+            {userData?.role === 'admin' && (
+              <button className="dashboard-menu-item" onClick={() => navigate('/admin')} style={{ color: 'var(--primary-color)' }}>
+                <Settings size={20} /> Espace Administrateur
+              </button>
+            )}
             <button className="dashboard-menu-item" onClick={handleLogout} style={{ color: '#f43f5e', marginTop: 'auto' }}>
               <LogOut size={20} /> Déconnexion
             </button>
@@ -870,11 +1003,37 @@ const Dashboard = () => {
 
           {activeTab === 'orders' && (
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-              <h3 style={{ marginBottom: '2rem', fontSize: '1.8rem' }}>Historique d'Achat</h3>
-              <div style={{ textAlign: 'center', padding: '4rem 0', opacity: 0.5 }}>
-                <ShoppingBag size={48} style={{ marginBottom: '1rem' }} />
-                <p className="text-muted">Aucune commande pour le moment.</p>
-              </div>
+              <h3 style={{ marginBottom: '2rem', fontSize: '1.8rem' }}>Historique d'Achats</h3>
+              {orders.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '4rem 0', opacity: 0.5 }}>
+                  <ShoppingBag size={48} style={{ marginBottom: '1rem' }} />
+                  <p className="text-muted">Aucune commande pour le moment.</p>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  {orders.map((order, idx) => (
+                    <div key={idx} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', padding: '1.5rem', borderRadius: '15px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                        <div>
+                          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '0.2rem' }}>Commande du {order.createdAt?.toDate().toLocaleDateString('fr-FR')}</p>
+                          <p style={{ fontWeight: 'bold' }}>Total: {order.total.toLocaleString()} FC <span style={{ color: 'var(--secondary-color)', fontSize: '0.9rem', marginLeft: '0.5rem', border: '1px solid var(--secondary-color)', padding: '2px 6px', borderRadius: '8px' }}>{order.paymentMethod.toUpperCase()}</span></p>
+                        </div>
+                        <div style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', padding: '0.4rem 1rem', borderRadius: '50px', fontSize: '0.9rem', fontWeight: 'bold' }}>
+                          Réglée
+                        </div>
+                      </div>
+                      <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1rem' }}>
+                        {order.items.map((item, i) => (
+                          <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.95rem', marginBottom: '0.5rem' }}>
+                            <span>1x {item.name}</span>
+                            <span className="text-muted">{item.price.toLocaleString()} FC</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </motion.div>
           )}
 
@@ -884,32 +1043,170 @@ const Dashboard = () => {
               <p className="text-muted">Ces paramètres globaux seront disponibles dans une version ultérieure.</p>
             </motion.div>
           )}
+        </div>
+      </div>
+    </motion.div>
+  );
+}
 
-          {activeTab === 'admin' && (
+const AdminPanel = () => {
+  const [activeTab, setActiveTab] = useState('overview');
+  const { isAuthenticated, currentUser, userData } = useContext(AppContext);
+  const [allOrders, setAllOrders] = useState([]);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (!isAuthenticated || !currentUser) {
+        navigate('/auth');
+      } else if (userData && userData.role !== 'admin') {
+        navigate('/dashboard');
+      } else if (userData && userData.role === 'admin') {
+        // Fetch TOUTES les commandes pour l'admin panel
+        const fetchAllOrders = async () => {
+          try {
+            const querySnapshot = await getDocs(collection(db, "orders"));
+            const fetchedOrders = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            fetchedOrders.sort((a, b) => b.createdAt.toDate() - a.createdAt.toDate());
+            setAllOrders(fetchedOrders);
+          } catch (e) {
+            console.error("Erreur admin orders", e);
+          }
+        };
+        fetchAllOrders();
+      }
+    }, 1000);
+    return () => clearTimeout(timeout);
+  }, [isAuthenticated, currentUser, userData, navigate]);
+
+  if (!isAuthenticated || !currentUser || !userData || userData.role !== 'admin') return (
+    <div className="section container flex-center" style={{ minHeight: '80vh' }}>
+      <p className="text-muted">Vérification des droits d'administration en cours...</p>
+    </div>
+  );
+
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="section container">
+      <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', marginBottom: '4rem' }}>
+        <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'linear-gradient(135deg, #f43f5e, var(--secondary-color))', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 10px 20px rgba(244, 63, 94, 0.4)', fontSize: '2rem', fontWeight: '800' }}>
+          <Settings size={36} color="white" />
+        </div>
+        <div>
+          <h2 style={{ fontSize: '2.5rem', marginBottom: '0.2rem' }}>Administration <span style={{ fontSize: '1rem', color: 'var(--primary-color)', verticalAlign: 'middle', border: '1px solid var(--primary-color)', padding: '2px 8px', borderRadius: '10px' }}>PRO</span></h2>
+          <p className="text-muted" style={{ fontSize: '1.1rem' }}>Espace réservé aux développeurs & Mngt</p>
+        </div>
+      </div>
+
+      <div className="dashboard-grid">
+        <div className="glass-panel" style={{ padding: '2rem' }}>
+          <div className="dashboard-menu">
+            <button className={`dashboard-menu-item ${activeTab === 'overview' ? 'active' : ''}`} onClick={() => setActiveTab('overview')}>
+              <BarChart size={20} /> Vue Générale
+            </button>
+            <button className={`dashboard-menu-item ${activeTab === 'artists' ? 'active' : ''}`} onClick={() => setActiveTab('artists')}>
+              <Mic2 size={20} /> Gestion Artistes
+            </button>
+            <button className={`dashboard-menu-item ${activeTab === 'store' ? 'active' : ''}`} onClick={() => setActiveTab('store')}>
+              <ShoppingBag size={20} /> Boutique & Stocks
+            </button>
+            <button className={`dashboard-menu-item ${activeTab === 'orders' ? 'active' : ''}`} onClick={() => setActiveTab('orders')}>
+              <CheckCircle2 size={20} /> Toutes les Commandes
+            </button>
+            <button className="dashboard-menu-item" onClick={() => navigate('/dashboard')} style={{ marginTop: 'auto' }}>
+              <ArrowLeft size={20} /> Retour au Site
+            </button>
+          </div>
+        </div>
+
+        <div className="glass-panel">
+          {activeTab === 'overview' && (
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-              <h3 style={{ marginBottom: '2.5rem', fontSize: '1.8rem' }}>Administration <span style={{ fontSize: '0.8rem', color: 'var(--secondary-color)' }}>*DEV*</span></h3>
-              <div style={{ background: 'rgba(244, 63, 94, 0.05)', border: '1px solid rgba(244, 63, 94, 0.2)', padding: '2rem', borderRadius: '20px', marginBottom: '2rem' }}>
-                <h4 style={{ marginBottom: '1rem' }}>Base de Données Firestore (Artistes)</h4>
-                <p className="text-muted" style={{ marginBottom: '1.5rem', fontSize: '0.95rem' }}>Injectez les données factices initiales dans votre Firestore (utile si Firestore vient d'être activé et est vide).</p>
+              <h3 style={{ marginBottom: '2.5rem', fontSize: '1.8rem' }}>Vue d'ensemble du Site</h3>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '2rem', marginBottom: '3rem' }}>
+                <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', padding: '2rem', borderRadius: '20px' }}>
+                  <p className="text-muted" style={{ marginBottom: '0.5rem', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Total Ventes Store</p>
+                  <h4 style={{ color: 'var(--primary-color)', fontSize: '1.8rem' }}>{allOrders.reduce((acc, curr) => acc + curr.total, 0).toLocaleString()} <span style={{ fontSize: '1rem' }}>FC</span></h4>
+                </div>
+                <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', padding: '2rem', borderRadius: '20px' }}>
+                  <p className="text-muted" style={{ marginBottom: '0.5rem', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Commandes</p>
+                  <h4 style={{ fontSize: '1.8rem', fontFamily: 'Outfit' }}>{allOrders.length}</h4>
+                </div>
+                <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', padding: '2rem', borderRadius: '20px' }}>
+                  <p className="text-muted" style={{ marginBottom: '0.5rem', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Nouveaux Fans</p>
+                  <h4 style={{ fontSize: '1.8rem', fontFamily: 'Outfit' }}>--</h4>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {activeTab === 'artists' && (
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+              <h3 style={{ marginBottom: '2.5rem', fontSize: '1.8rem' }}>Gestion des Artistes</h3>
+              <div style={{ background: 'rgba(244, 63, 94, 0.05)', border: '1px solid rgba(244, 63, 94, 0.2)', padding: '2rem', borderRadius: '20px', marginBottom: '3rem' }}>
+                <h4 style={{ marginBottom: '1rem' }}>Initialisation Firestore (Test)</h4>
+                <p className="text-muted" style={{ marginBottom: '1.5rem', fontSize: '0.95rem' }}>Déployez les données factices initiales dans Firebase pour peupler la page Artiste si elle est vide.</p>
                 <button className="btn-primary" style={{ width: '100%' }} onClick={async () => {
-                  if (!window.confirm("Ceci va envoyer la liste initiale des artistes à Firestore. Continuer ?")) return;
+                  if (!window.confirm("Envoyer les artistes (Lynx, Nova...) sur Firestore ?")) return;
                   try {
                     for (const artist of INITIAL_ARTISTS) {
                       await setDoc(doc(db, "artists", artist.id), artist);
                     }
-                    alert("Succès ! Les artistes ont été ajoutés à Firestore.");
-                    window.location.reload();
+                    alert("Succès ! Les artistes sont en ligne.");
                   } catch (e) {
                     console.error(e);
-                    alert("Erreur Firestore : Vérifiez que les Règles de Sécurité Firestore sont bien en mode 'Test'.");
+                    alert("Erreur d'écriture Firebase.");
                   }
                 }}>
-                  <Upload size={18} style={{ marginRight: '0.5rem' }} /> Uploader les données artistes
+                  <Upload size={18} style={{ marginRight: '0.5rem' }} /> Injecter les données
                 </button>
               </div>
             </motion.div>
           )}
 
+          {activeTab === 'store' && (
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+              <h3 style={{ marginBottom: '2.5rem', fontSize: '1.8rem' }}>Boutique & Produits</h3>
+              <p className="text-muted">L'ajout de produits dynamiques depuis cet espace (T-shirts, Casquettes, CDs) arrivera dans une prochaine mise à jour.</p>
+            </motion.div>
+          )}
+
+          {activeTab === 'orders' && (
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+              <h3 style={{ marginBottom: '2rem', fontSize: '1.8rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <ShoppingBag size={24} color="var(--primary-color)" /> Commandes Validées
+              </h3>
+              {allOrders.length === 0 ? (
+                <p className="text-muted" style={{ fontSize: '1rem', marginTop: '2rem' }}>Aucune commande passée sur la plateforme.</p>
+              ) : (
+                <div style={{ overflowX: 'auto' }}>
+                  <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse', marginTop: '1rem', fontSize: '0.95rem' }}>
+                    <thead>
+                      <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                        <th style={{ padding: '1rem 0', color: 'var(--text-muted)' }}>Date</th>
+                        <th style={{ padding: '1rem 0', color: 'var(--text-muted)' }}>Client / Email</th>
+                        <th style={{ padding: '1rem 0', color: 'var(--text-muted)' }}>Montant</th>
+                        <th style={{ padding: '1rem 0', color: 'var(--text-muted)' }}>Paiement</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {allOrders.map((o, idx) => (
+                        <tr key={idx} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                          <td style={{ padding: '1rem 0' }}>{o.createdAt?.toDate().toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}</td>
+                          <td style={{ padding: '1rem 0', fontWeight: 'bold' }}>{o.userEmail}</td>
+                          <td style={{ padding: '1rem 0', color: 'white' }}>{o.total.toLocaleString()} FC</td>
+                          <td style={{ padding: '1rem 0' }}>
+                            <span style={{ fontSize: '0.8rem', border: '1px solid var(--primary-color)', color: 'var(--primary-color)', padding: '2px 8px', borderRadius: '10px' }}>
+                              {o.paymentMethod.toUpperCase()}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </motion.div>
+          )}
         </div>
       </div>
     </motion.div>
@@ -931,6 +1228,7 @@ const AnimatedRoutes = () => {
           <Route path="/store" element={<Store />} />
           <Route path="/pro" element={<PortailPro />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/admin" element={<AdminPanel />} />
         </Routes>
       </AnimatePresence>
       <Footer />
