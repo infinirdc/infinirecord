@@ -1,9 +1,13 @@
 import React, { useState, createContext, useContext, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Music, ShoppingBag, Mic2, Star, PlayCircle, Headphones, ArrowRight, CheckCircle2, Search, X, User, BarChart, Settings, Upload, CreditCard, Heart, Trash2, Infinity, LogIn, ChevronRight, Menu, Calendar, Video, ArrowLeft } from 'lucide-react';
+import { Music, ShoppingBag, Mic2, Star, PlayCircle, Headphones, ArrowRight, CheckCircle2, Search, X, User, BarChart, Settings, Upload, CreditCard, Heart, Trash2, Infinity, LogIn, ChevronRight, Menu, Calendar, Video, ArrowLeft, LogOut } from 'lucide-react';
 import './index.css';
 import logoWhite from './assets/logo-white.svg';
+
+import { auth, db } from './firebase';
+import { onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from 'firebase/auth';
+import { collection, getDocs, doc, getDoc, setDoc } from 'firebase/firestore';
 
 // --- CONTEXT: PANIER, RECHERCHE & AUTH ---
 const AppContext = createContext();
@@ -14,6 +18,20 @@ const AppProvider = ({ children }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchActive, setIsSearchActive] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setIsAuthenticated(true);
+        setCurrentUser(user);
+      } else {
+        setIsAuthenticated(false);
+        setCurrentUser(null);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
 
   const addToCart = (item) => {
     setCart([...cart, item]);
@@ -27,14 +45,14 @@ const AppProvider = ({ children }) => {
   const cartTotal = cart.reduce((total, item) => total + item.price, 0);
 
   return (
-    <AppContext.Provider value={{ cart, addToCart, removeFromCart, isCartOpen, setIsCartOpen, cartTotal, searchQuery, setSearchQuery, isSearchActive, setIsSearchActive, isAuthenticated, setIsAuthenticated }}>
+    <AppContext.Provider value={{ cart, addToCart, removeFromCart, isCartOpen, setIsCartOpen, cartTotal, searchQuery, setSearchQuery, isSearchActive, setIsSearchActive, isAuthenticated, currentUser }}>
       {children}
     </AppContext.Provider>
   );
 };
 
-// --- DATA: ARTISTES ---
-const artistsData = [
+// --- DATA: INITIALISATION FIRESTORE ---
+export const INITIAL_ARTISTS = [
   {
     id: "lynx",
     name: "Lynx",
@@ -118,9 +136,15 @@ const Navbar = () => {
           </ul>
 
           <div className="nav-actions">
-            <Link to="/auth" className="btn-secondary" style={{ padding: '0.5rem 1.5rem', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <User size={16} /> Connexion
-            </Link>
+            {isAuthenticated ? (
+              <Link to="/dashboard" className="btn-secondary" style={{ padding: '0.5rem 1.5rem', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <User size={16} /> Mon Espace
+              </Link>
+            ) : (
+              <Link to="/auth" className="btn-secondary" style={{ padding: '0.5rem 1.5rem', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <User size={16} /> Connexion
+              </Link>
+            )}
           </div>
         </nav>
       </div>
@@ -299,13 +323,54 @@ const Home = () => {
 // PAGE AUTHENTICATION
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
-  const navigate = useNavigate();
-  const { setIsAuthenticated } = useContext(AppContext);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const navigate = useNavigate();
+  const { isAuthenticated } = useContext(AppContext);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/dashboard');
+    }
+  }, [isAuthenticated, navigate]);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsAuthenticated(true);
-    navigate('/dashboard');
+    setError(null);
+    setLoading(true);
+
+    try {
+      if (isLogin) {
+        await signInWithEmailAndPassword(auth, email, password);
+      } else {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        // Créer le profil dans Firestore
+        await setDoc(doc(db, "users", user.uid), {
+          uid: user.uid,
+          name: name,
+          email: email,
+          role: 'fan',
+          createdAt: new Date()
+        });
+      }
+      navigate('/dashboard');
+    } catch (err) {
+      console.error(err);
+      if (err.code === 'auth/invalid-credential') {
+        setError("Email ou mot de passe incorrect.");
+      } else if (err.code === 'auth/email-already-in-use') {
+        setError("Cet email est déjà utilisé.");
+      } else {
+        setError(err.message);
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -317,26 +382,32 @@ const Auth = () => {
           <p className="text-muted">Accédez à l'univers Infini Record</p>
         </div>
 
+        {error && (
+          <div style={{ background: 'rgba(244, 63, 94, 0.1)', border: '1px solid rgba(244, 63, 94, 0.3)', color: '#f43f5e', padding: '1rem', borderRadius: '12px', marginBottom: '1.5rem', fontSize: '0.9rem', textAlign: 'center' }}>
+            {error}
+          </div>
+        )}
+
         <form onSubmit={handleSubmit}>
           {!isLogin && (
             <div style={{ marginBottom: '1.5rem' }}>
               <label className="form-label">Nom Complet</label>
-              <input type="text" className="form-control" required style={{ marginBottom: 0 }} />
+              <input type="text" className="form-control" value={name} onChange={(e) => setName(e.target.value)} required style={{ marginBottom: 0 }} />
             </div>
           )}
 
           <div style={{ marginBottom: '1.5rem' }}>
             <label className="form-label">Adresse Email</label>
-            <input type="email" className="form-control" required style={{ marginBottom: 0 }} />
+            <input type="email" className="form-control" value={email} onChange={(e) => setEmail(e.target.value)} required style={{ marginBottom: 0 }} />
           </div>
 
           <div style={{ marginBottom: '2.5rem' }}>
             <label className="form-label">Mot de passe</label>
-            <input type="password" className="form-control" required style={{ marginBottom: 0 }} />
+            <input type="password" className="form-control" value={password} onChange={(e) => setPassword(e.target.value)} required style={{ marginBottom: 0 }} />
           </div>
 
-          <button type="submit" className="btn-primary" style={{ width: '100%', marginBottom: '1.5rem', padding: '1rem' }}>
-            {isLogin ? 'Se Connecter' : 'Créer un compte'}
+          <button type="submit" className="btn-primary" disabled={loading} style={{ width: '100%', marginBottom: '1.5rem', padding: '1rem' }}>
+            {loading ? 'Chargement...' : (isLogin ? 'Se Connecter' : 'Créer un compte')}
           </button>
         </form>
 
@@ -354,6 +425,32 @@ const Auth = () => {
 };
 
 const Artistes = () => {
+  const [artists, setArtists] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchArtists = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, "artists"));
+        const artistList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setArtists(artistList);
+      } catch (error) {
+        console.error("Erreur fetch artistes: ", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchArtists();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="section container flex-center" style={{ minHeight: '60vh' }}>
+        <p className="text-muted" style={{ fontSize: '1.2rem' }}>Chargement des talents depuis Firebase...</p>
+      </div>
+    );
+  }
+
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="section container">
       <div style={{ textAlign: 'center', marginBottom: '5rem' }}>
@@ -362,7 +459,9 @@ const Artistes = () => {
       </div>
 
       <div className="grid-cards">
-        {artistsData.map((artist, idx) => (
+        {artists.length === 0 ? (
+          <p className="text-muted" style={{ textAlign: 'center', gridColumn: '1 / -1' }}>Aucun artiste trouvé. Utilisez le Panel Admin (Dashboard) pour initialiser Firebase.</p>
+        ) : artists.map((artist, idx) => (
           <Link to={`/artistes/${artist.id}`} key={idx} className="product-card">
             <div className="product-image-wrapper">
               <img src={artist.image} alt={artist.name} className="product-image" />
@@ -388,7 +487,33 @@ const Artistes = () => {
 const ArtisteProfile = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const artist = artistsData.find(a => a.id === id);
+  const [artist, setArtist] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchArtist = async () => {
+      try {
+        const docRef = doc(db, "artists", id);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          setArtist({ id: docSnap.id, ...docSnap.data() });
+        }
+      } catch (error) {
+        console.error("Erreur fetch artiste :", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchArtist();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="section container flex-center" style={{ minHeight: '80vh' }}>
+        <p className="text-muted" style={{ fontSize: '1.2rem' }}>Chargement depuis Firestore...</p>
+      </div>
+    );
+  }
 
   if (!artist) {
     return (
@@ -657,27 +782,51 @@ const PortailPro = () => {
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
-  const { isAuthenticated } = useContext(AppContext);
+  const { isAuthenticated, currentUser } = useContext(AppContext);
+  const [userData, setUserData] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Si non connecté, rediriger vers Auth
-    if (!isAuthenticated) {
-      navigate('/auth');
-    }
-  }, [isAuthenticated, navigate]);
+    // Petit délai le temps que Firebase vérifie la session
+    const timeout = setTimeout(() => {
+      if (!isAuthenticated && !currentUser) {
+        navigate('/auth');
+      } else if (currentUser) {
+        // Fetch les infos utilisateur additionnelles (nom, rôle) depuis Firestore
+        getDoc(doc(db, "users", currentUser.uid)).then((docSnap) => {
+          if (docSnap.exists()) {
+            setUserData(docSnap.data());
+          }
+        });
+      }
+    }, 1500);
+    return () => clearTimeout(timeout);
+  }, [isAuthenticated, currentUser, navigate]);
 
-  if (!isAuthenticated) return null; // Ne pas flasher le dashboard
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      navigate('/');
+    } catch (e) {
+      console.error('Erreur déconnexion', e);
+    }
+  };
+
+  if (!isAuthenticated || !currentUser) return (
+    <div className="section container flex-center" style={{ minHeight: '80vh' }}>
+      <p className="text-muted">Vérification de la session en cours...</p>
+    </div>
+  );
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="section container">
       <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', marginBottom: '4rem' }}>
-        <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 10px 20px rgba(109, 40, 217, 0.4)' }}>
-          <User size={36} color="white" />
+        <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 10px 20px rgba(109, 40, 217, 0.4)', fontSize: '2rem', fontWeight: '800' }}>
+          {userData?.name ? userData.name[0].toUpperCase() : (currentUser.email ? currentUser.email[0].toUpperCase() : <User size={36} color="white" />)}
         </div>
         <div>
-          <h2 style={{ fontSize: '2.5rem', marginBottom: '0.2rem' }}>Mon Espace</h2>
-          <p className="text-muted" style={{ fontSize: '1.1rem' }}>ID: INF-902-X</p>
+          <h2 style={{ fontSize: '2.5rem', marginBottom: '0.2rem' }}>Bonjour, {userData?.name || 'Artiste'}</h2>
+          <p className="text-muted" style={{ fontSize: '1.1rem' }}>{currentUser.email}</p>
         </div>
       </div>
 
@@ -692,6 +841,12 @@ const Dashboard = () => {
             </button>
             <button className={`dashboard-menu-item ${activeTab === 'settings' ? 'active' : ''}`} onClick={() => setActiveTab('settings')}>
               <Settings size={20} /> Compte & Sécurité
+            </button>
+            <button className={`dashboard-menu-item ${activeTab === 'admin' ? 'active' : ''}`} onClick={() => setActiveTab('admin')} style={{ color: 'var(--primary-color)' }}>
+              <Settings size={20} /> Panel Admin
+            </button>
+            <button className="dashboard-menu-item" onClick={handleLogout} style={{ color: '#f43f5e', marginTop: 'auto' }}>
+              <LogOut size={20} /> Déconnexion
             </button>
           </div>
         </div>
@@ -727,6 +882,31 @@ const Dashboard = () => {
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
               <h3 style={{ marginBottom: '2rem', fontSize: '1.8rem' }}>Configuration</h3>
               <p className="text-muted">Ces paramètres globaux seront disponibles dans une version ultérieure.</p>
+            </motion.div>
+          )}
+
+          {activeTab === 'admin' && (
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+              <h3 style={{ marginBottom: '2.5rem', fontSize: '1.8rem' }}>Administration <span style={{ fontSize: '0.8rem', color: 'var(--secondary-color)' }}>*DEV*</span></h3>
+              <div style={{ background: 'rgba(244, 63, 94, 0.05)', border: '1px solid rgba(244, 63, 94, 0.2)', padding: '2rem', borderRadius: '20px', marginBottom: '2rem' }}>
+                <h4 style={{ marginBottom: '1rem' }}>Base de Données Firestore (Artistes)</h4>
+                <p className="text-muted" style={{ marginBottom: '1.5rem', fontSize: '0.95rem' }}>Injectez les données factices initiales dans votre Firestore (utile si Firestore vient d'être activé et est vide).</p>
+                <button className="btn-primary" style={{ width: '100%' }} onClick={async () => {
+                  if (!window.confirm("Ceci va envoyer la liste initiale des artistes à Firestore. Continuer ?")) return;
+                  try {
+                    for (const artist of INITIAL_ARTISTS) {
+                      await setDoc(doc(db, "artists", artist.id), artist);
+                    }
+                    alert("Succès ! Les artistes ont été ajoutés à Firestore.");
+                    window.location.reload();
+                  } catch (e) {
+                    console.error(e);
+                    alert("Erreur Firestore : Vérifiez que les Règles de Sécurité Firestore sont bien en mode 'Test'.");
+                  }
+                }}>
+                  <Upload size={18} style={{ marginRight: '0.5rem' }} /> Uploader les données artistes
+                </button>
+              </div>
             </motion.div>
           )}
 
