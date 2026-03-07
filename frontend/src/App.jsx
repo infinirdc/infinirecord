@@ -116,6 +116,33 @@ export const INITIAL_ARTISTS = [
   }
 ];
 
+export const INITIAL_PRODUCTS = [
+  {
+    id: "hoodie-infini",
+    name: 'Hoodie "Infini Origin"',
+    price: 35000,
+    description: "Coton lourd 100% bio. Broderie haute précision et finitions premium.",
+    image: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?auto=format&fit=crop&w=800&q=80",
+    type: "merch"
+  },
+  {
+    id: "vinyle-zenith",
+    name: 'Vinyle "The Zenith - EP"',
+    price: 25000,
+    description: "Édition limitée dédicacée. Pressage 180g de haute qualité audio.",
+    image: "https://images.unsplash.com/photo-1603048297172-c92544798d5e?auto=format&fit=crop&w=800&q=80",
+    type: "merch"
+  },
+  {
+    id: "vip-pass",
+    name: 'Abonnement VIP Infini',
+    price: 15000,
+    description: "Écoute inédite, accès backstage aux concerts et -20% sur tout le Merchandising.",
+    image: "https://images.unsplash.com/photo-1541701494587-cb58502866ab?auto=format&fit=crop&w=800&q=80",
+    type: "service"
+  }
+];
+
 // --- COMPONENTS ---
 
 const Navbar = () => {
@@ -751,6 +778,31 @@ const ArtisteProfile = () => {
 
 const Store = () => {
   const { addToCart } = useContext(AppContext);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, "products"));
+        const productsList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setProducts(productsList);
+      } catch (error) {
+        console.error("Erreur fetch produits: ", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProducts();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="section container flex-center" style={{ minHeight: '60vh' }}>
+        <p className="text-muted" style={{ fontSize: '1.2rem' }}>Chargement de la boutique depuis la base de données...</p>
+      </div>
+    );
+  }
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="section container">
@@ -760,73 +812,58 @@ const Store = () => {
       </div>
 
       <div className="grid-cards">
+        {products.length === 0 ? (
+          <p className="text-muted" style={{ textAlign: 'center', gridColumn: '1 / -1' }}>Aucun produit dans la boutique. Utilisez le Panel Admin pour injecter les données.</p>
+        ) : (
+          products.map((product, idx) => (
+            <div key={idx} className={product.type === 'service' ? "glass-panel" : "product-card"} style={product.type === 'service' ? { borderTop: '4px solid var(--secondary-color)', display: 'flex', flexDirection: 'column' } : {}}>
+              {product.type !== 'service' && product.image && (
+                <div className="product-image-wrapper">
+                  <img src={product.image} alt={product.name} className="product-image" />
+                  <div className="product-overlay">
+                    <button
+                      className="btn-primary"
+                      style={{ width: '100%', gap: '0.5rem' }}
+                      onClick={(e) => { e.preventDefault(); addToCart({ name: product.name, price: product.price }); }}
+                    >
+                      <ShoppingBag size={20} /> Ajouter
+                    </button>
+                  </div>
+                </div>
+              )}
 
-        {/* Produit Merchandising avec Image */}
-        <div className="product-card">
-          <div className="product-image-wrapper">
-            <img src="https://images.unsplash.com/photo-1556821840-3a63f95609a7?auto=format&fit=crop&w=800&q=80" alt="Hoodie Infini Logo" className="product-image" />
-            <div className="product-overlay">
-              <button
-                className="btn-primary"
-                style={{ width: '100%', gap: '0.5rem' }}
-                onClick={(e) => { e.preventDefault(); addToCart({ name: 'Hoodie "Infini Origin"', price: 35000 }); }}
-              >
-                <ShoppingBag size={20} /> Ajouter
-              </button>
-            </div>
-          </div>
-          <div className="product-info">
-            <h3 className="product-title">Hoodie "Infini Origin"</h3>
-            <p className="text-muted" style={{ fontSize: '0.9rem', marginBottom: '1rem' }}>Coton lourd 100% bio. Broderie haute précision.</p>
-            <div className="product-price">35.000 FC</div>
-          </div>
-        </div>
+              {product.type === 'service' && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', marginTop: '1rem' }}>
+                  <h3 style={{ fontSize: '2rem' }}>{product.name}</h3>
+                  <div style={{ background: 'var(--secondary-color)', padding: '0.8rem', borderRadius: '50%' }}>
+                    <Star color="white" size={28} />
+                  </div>
+                </div>
+              )}
 
-        {/* Vinyle */}
-        <div className="product-card">
-          <div className="product-image-wrapper">
-            <img src="https://images.unsplash.com/photo-1603048297172-c92544798d5e?auto=format&fit=crop&w=800&q=80" alt="Vinyle The Zenith" className="product-image" />
-            <div className="product-overlay">
-              <button
-                className="btn-primary"
-                style={{ width: '100%', gap: '0.5rem' }}
-                onClick={(e) => { e.preventDefault(); addToCart({ name: 'Vinyle "The Zenith - EP"', price: 25000 }); }}
-              >
-                <ShoppingBag size={20} /> Ajouter
-              </button>
-            </div>
-          </div>
-          <div className="product-info">
-            <h3 className="product-title">Vinyle "The Zenith - Debut EP"</h3>
-            <p className="text-muted" style={{ fontSize: '0.9rem', marginBottom: '1rem' }}>Édition limitée dédicacée. Pressage 180g.</p>
-            <div className="product-price">25.000 FC</div>
-          </div>
-        </div>
+              <div className="product-info" style={product.type === 'service' ? { flexGrow: 1, padding: 0 } : {}}>
+                {product.type !== 'service' && <h3 className="product-title">{product.name}</h3>}
+                {product.type === 'service' && (
+                  <div style={{ fontSize: '2.5rem', fontWeight: '900', marginBottom: '1.5rem', fontFamily: 'Outfit', color: 'white', lineHeight: 1 }}>
+                    {product.price.toLocaleString()}<span style={{ fontSize: '1rem', color: 'var(--text-muted)', fontWeight: '500' }}> FC/mois</span>
+                  </div>
+                )}
+                <p className="text-muted" style={{ fontSize: '0.9rem', marginBottom: '1.5rem' }}>{product.description}</p>
+                {product.type !== 'service' && <div className="product-price">{product.price.toLocaleString()} FC</div>}
+              </div>
 
-        {/* Fan Club VIP (Carte de Service) */}
-        <div className="glass-panel" style={{ borderTop: '4px solid var(--secondary-color)', background: 'linear-gradient(180deg, rgba(244, 63, 94, 0.08) 0%, rgba(15, 10, 20, 0.4) 100%)', display: 'flex', flexDirection: 'column' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-            <h3 style={{ fontSize: '2rem' }}>Passe VIP</h3>
-            <div style={{ background: 'var(--secondary-color)', padding: '0.8rem', borderRadius: '50%' }}>
-              <Star color="white" size={28} />
+              {product.type === 'service' && (
+                <button
+                  className="btn-primary"
+                  style={{ width: '100%', background: 'linear-gradient(135deg, var(--secondary-color), #be123c)' }}
+                  onClick={() => addToCart({ name: product.name, price: product.price })}
+                >
+                  S'abonner maintenant
+                </button>
+              )}
             </div>
-          </div>
-          <div style={{ fontSize: '3rem', fontWeight: '900', marginBottom: '1.5rem', fontFamily: 'Outfit', color: 'white', lineHeight: 1 }}>
-            15.000<span style={{ fontSize: '1.2rem', color: 'var(--text-muted)', fontWeight: '500' }}> FC/mois</span>
-          </div>
-          <ul style={{ listStyle: 'none', padding: '0', marginBottom: '3rem', flexGrow: 1 }}>
-            <li style={{ display: 'flex', alignItems: 'flex-start', gap: '0.8rem', marginBottom: '1.2rem' }}><CheckCircle2 size={20} color="#10b981" style={{ flexShrink: 0, marginTop: '2px' }} /> <span className="text-muted">Écoute Inédite (1 sem. avant sortie)</span></li>
-            <li style={{ display: 'flex', alignItems: 'flex-start', gap: '0.8rem', marginBottom: '1.2rem' }}><CheckCircle2 size={20} color="#10b981" style={{ flexShrink: 0, marginTop: '2px' }} /> <span className="text-muted">Accès Backstage aux concerts</span></li>
-            <li style={{ display: 'flex', alignItems: 'flex-start', gap: '0.8rem', marginBottom: '1.2rem' }}><CheckCircle2 size={20} color="#10b981" style={{ flexShrink: 0, marginTop: '2px' }} /> <span className="text-muted">-20% sur tout le Merchandising</span></li>
-          </ul>
-          <button
-            className="btn-primary"
-            style={{ width: '100%', background: 'linear-gradient(135deg, var(--secondary-color), #be123c)' }}
-            onClick={() => addToCart({ name: 'Abonnement VIP Infini (1 mois)', price: 15000 })}
-          >
-            S'abonner maintenant
-          </button>
-        </div>
+          ))
+        )}
       </div>
     </motion.div>
   );
@@ -1062,7 +1099,6 @@ const AdminPanel = () => {
       } else if (userData && userData.role !== 'admin') {
         navigate('/dashboard');
       } else if (userData && userData.role === 'admin') {
-        // Fetch TOUTES les commandes pour l'admin panel
         const fetchAllOrders = async () => {
           try {
             const querySnapshot = await getDocs(collection(db, "orders"));
@@ -1078,6 +1114,35 @@ const AdminPanel = () => {
     }, 1000);
     return () => clearTimeout(timeout);
   }, [isAuthenticated, currentUser, userData, navigate]);
+
+  // Nouveaux états pour formulaires d'ajout
+  const [newArtist, setNewArtist] = useState({ name: '', genre: '', bio: '', fullBio: '', image: '', cover: '' });
+  const [newProduct, setNewProduct] = useState({ name: '', description: '', price: '', image: '' });
+
+  const handleAddArtist = async (e) => {
+    e.preventDefault();
+    try {
+      const id = newArtist.name.toLowerCase().replace(/\s+/g, '-');
+      await setDoc(doc(db, "artists", id), { ...newArtist, id, latestTracks: [], upcomingGigs: [] });
+      alert("Nouvel artiste ajouté avec succès !");
+      setNewArtist({ name: '', genre: '', bio: '', fullBio: '', image: '', cover: '' });
+    } catch (err) {
+      console.error(err);
+      alert("Erreur lors de l'ajout de l'artiste");
+    }
+  };
+
+  const handleAddProduct = async (e) => {
+    e.preventDefault();
+    try {
+      await addDoc(collection(db, "products"), { ...newProduct, price: Number(newProduct.price), type: 'merch' });
+      alert("Nouveau produit de la boutique ajouté avec succès !");
+      setNewProduct({ name: '', description: '', price: '', image: '' });
+    } catch (err) {
+      console.error(err);
+      alert("Erreur lors de l'ajout du produit");
+    }
+  };
 
   if (!isAuthenticated || !currentUser || !userData || userData.role !== 'admin') return (
     <div className="section container flex-center" style={{ minHeight: '80vh' }}>
@@ -1142,22 +1207,58 @@ const AdminPanel = () => {
           {activeTab === 'artists' && (
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
               <h3 style={{ marginBottom: '2.5rem', fontSize: '1.8rem' }}>Gestion des Artistes</h3>
-              <div style={{ background: 'rgba(244, 63, 94, 0.05)', border: '1px solid rgba(244, 63, 94, 0.2)', padding: '2rem', borderRadius: '20px', marginBottom: '3rem' }}>
-                <h4 style={{ marginBottom: '1rem' }}>Initialisation Firestore (Test)</h4>
-                <p className="text-muted" style={{ marginBottom: '1.5rem', fontSize: '0.95rem' }}>Déployez les données factices initiales dans Firebase pour peupler la page Artiste si elle est vide.</p>
-                <button className="btn-primary" style={{ width: '100%' }} onClick={async () => {
-                  if (!window.confirm("Envoyer les artistes (Lynx, Nova...) sur Firestore ?")) return;
+
+              <div style={{ background: 'rgba(255, 255, 255, 0.03)', border: '1px solid rgba(255, 255, 255, 0.05)', padding: '2rem', borderRadius: '20px', marginBottom: '3rem' }}>
+                <h4 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <Mic2 size={20} color="var(--primary-color)" /> Ajouter un nouvel artiste
+                </h4>
+                <form onSubmit={handleAddArtist} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                  <div style={{ gridColumn: 'span 1' }}>
+                    <label className="form-label">Nom de l'artiste</label>
+                    <input type="text" className="form-control" value={newArtist.name} onChange={e => setNewArtist({ ...newArtist, name: e.target.value })} required placeholder="Ex: Fally Ipupa" />
+                  </div>
+                  <div style={{ gridColumn: 'span 1' }}>
+                    <label className="form-label">Genre Musical</label>
+                    <input type="text" className="form-control" value={newArtist.genre} onChange={e => setNewArtist({ ...newArtist, genre: e.target.value })} required placeholder="Ex: Rumba, Ndombolo..." />
+                  </div>
+                  <div style={{ gridColumn: '1 / -1' }}>
+                    <label className="form-label">Petite Biographie (Liste)</label>
+                    <input type="text" className="form-control" value={newArtist.bio} onChange={e => setNewArtist({ ...newArtist, bio: e.target.value })} required placeholder="Ex: Révélation de l'année..." />
+                  </div>
+                  <div style={{ gridColumn: '1 / -1' }}>
+                    <label className="form-label">Biographie Complète (Page Profil)</label>
+                    <textarea className="form-control" value={newArtist.fullBio} onChange={e => setNewArtist({ ...newArtist, fullBio: e.target.value })} required rows="3" placeholder="Écrivez sa bibliographie complète ici..."></textarea>
+                  </div>
+                  <div style={{ gridColumn: 'span 1' }}>
+                    <label className="form-label">Lien Image de Profil</label>
+                    <input type="url" className="form-control" value={newArtist.image} onChange={e => setNewArtist({ ...newArtist, image: e.target.value })} required placeholder="https://..." />
+                  </div>
+                  <div style={{ gridColumn: 'span 1' }}>
+                    <label className="form-label">Lien Cover (Bannière)</label>
+                    <input type="url" className="form-control" value={newArtist.cover} onChange={e => setNewArtist({ ...newArtist, cover: e.target.value })} required placeholder="https://..." />
+                  </div>
+                  <div style={{ gridColumn: '1 / -1' }}>
+                    <button type="submit" className="btn-primary" style={{ width: '100%' }}>Ajouter l'artiste à la Plateforme</button>
+                  </div>
+                </form>
+              </div>
+
+              <div style={{ background: 'rgba(244, 63, 94, 0.05)', border: '1px solid rgba(244, 63, 94, 0.2)', padding: '2rem', borderRadius: '20px' }}>
+                <h4 style={{ marginBottom: '1rem' }}>Initialisation Automatique via le Seed</h4>
+                <p className="text-muted" style={{ marginBottom: '1.5rem', fontSize: '0.95rem' }}>Déployez les 3 artistes factices du cache de l'application dans Firebase.</p>
+                <button className="btn-secondary" style={{ width: '100%' }} onClick={async () => {
+                  if (!window.confirm("Envoyer les artistes factices sur Firestore ?")) return;
                   try {
                     for (const artist of INITIAL_ARTISTS) {
                       await setDoc(doc(db, "artists", artist.id), artist);
                     }
-                    alert("Succès ! Les artistes sont en ligne.");
+                    alert("Succès ! Les artistes du seed sont en ligne.");
                   } catch (e) {
                     console.error(e);
                     alert("Erreur d'écriture Firebase.");
                   }
                 }}>
-                  <Upload size={18} style={{ marginRight: '0.5rem' }} /> Injecter les données
+                  <Upload size={18} style={{ marginRight: '0.5rem' }} /> Injecter le Seed Artistes
                 </button>
               </div>
             </motion.div>
@@ -1166,7 +1267,53 @@ const AdminPanel = () => {
           {activeTab === 'store' && (
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
               <h3 style={{ marginBottom: '2.5rem', fontSize: '1.8rem' }}>Boutique & Produits</h3>
-              <p className="text-muted">L'ajout de produits dynamiques depuis cet espace (T-shirts, Casquettes, CDs) arrivera dans une prochaine mise à jour.</p>
+
+              <div style={{ background: 'rgba(255, 255, 255, 0.03)', border: '1px solid rgba(255, 255, 255, 0.05)', padding: '2rem', borderRadius: '20px', marginBottom: '3rem' }}>
+                <h4 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <ShoppingBag size={20} color="var(--primary-color)" /> Ajouter un Article
+                </h4>
+                <form onSubmit={handleAddProduct} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                  <div style={{ gridColumn: 'span 1' }}>
+                    <label className="form-label">Nom de l'article</label>
+                    <input type="text" className="form-control" value={newProduct.name} onChange={e => setNewProduct({ ...newProduct, name: e.target.value })} required placeholder="Ex: T-Shirt Noir Infini..." />
+                  </div>
+                  <div style={{ gridColumn: 'span 1' }}>
+                    <label className="form-label">Prix (en FC)</label>
+                    <input type="number" className="form-control" value={newProduct.price} onChange={e => setNewProduct({ ...newProduct, price: e.target.value })} required placeholder="Ex: 25000" />
+                  </div>
+                  <div style={{ gridColumn: '1 / -1' }}>
+                    <label className="form-label">Description Courte</label>
+                    <input type="text" className="form-control" value={newProduct.description} onChange={e => setNewProduct({ ...newProduct, description: e.target.value })} required placeholder="Ex: Coton lourd bio, coupe oversize..." />
+                  </div>
+                  <div style={{ gridColumn: '1 / -1' }}>
+                    <label className="form-label">Lien de l'image (URL)</label>
+                    <input type="url" className="form-control" value={newProduct.image} onChange={e => setNewProduct({ ...newProduct, image: e.target.value })} required placeholder="https://..." />
+                  </div>
+                  <div style={{ gridColumn: '1 / -1' }}>
+                    <button type="submit" className="btn-primary" style={{ width: '100%' }}>Ajouter l'article au Store</button>
+                  </div>
+                </form>
+              </div>
+
+              <div style={{ background: 'rgba(244, 63, 94, 0.05)', border: '1px solid rgba(244, 63, 94, 0.2)', padding: '2rem', borderRadius: '20px' }}>
+                <h4 style={{ marginBottom: '1rem' }}>Initialisation Automatique du Store via le Seed</h4>
+                <p className="text-muted" style={{ marginBottom: '1.5rem', fontSize: '0.95rem' }}>Déployez le hoodie, le vinyle et le pass VIP dans Firebase.</p>
+                <button className="btn-secondary" style={{ width: '100%' }} onClick={async () => {
+                  if (!window.confirm("Envoyer le catalogue factice sur Firestore ?")) return;
+                  try {
+                    for (const product of INITIAL_PRODUCTS) {
+                      await setDoc(doc(db, "products", product.id), product);
+                    }
+                    alert("Succès ! La boutique a été initialisée.");
+                  } catch (e) {
+                    console.error(e);
+                    alert("Erreur d'écriture Firebase.");
+                  }
+                }}>
+                  <Upload size={18} style={{ marginRight: '0.5rem' }} /> Injecter le Seed Boutique
+                </button>
+              </div>
+
             </motion.div>
           )}
 
