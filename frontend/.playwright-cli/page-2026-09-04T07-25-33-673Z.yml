@@ -1,0 +1,61 @@
+- generic [ref=e3]:
+  - complementary [ref=e4]:
+    - generic [ref=e7] [cursor=pointer]: infini record
+    - generic [ref=e8]: Explorer
+    - navigation [ref=e9]:
+      - button "Accueil" [ref=e10] [cursor=pointer]:
+        - img [ref=e11]
+        - generic [ref=e14]: Accueil
+      - button "Découvrir" [ref=e15] [cursor=pointer]:
+        - img [ref=e16]
+        - generic [ref=e19]: Découvrir
+      - button "Musique" [ref=e20] [cursor=pointer]:
+        - img [ref=e21]
+        - generic [ref=e24]: Musique
+      - button "Vidéos" [ref=e25] [cursor=pointer]:
+        - img [ref=e26]
+        - generic [ref=e31]: Vidéos
+      - button "Performances" [ref=e32] [cursor=pointer]:
+        - img [ref=e33]
+        - generic [ref=e37]: Performances
+      - button "Artistes" [ref=e38] [cursor=pointer]:
+        - img [ref=e39]
+        - generic [ref=e44]: Artistes
+      - button "Boutique" [ref=e45] [cursor=pointer]:
+        - img [ref=e46]
+        - generic [ref=e49]: Boutique
+      - button "Bibliothèque" [ref=e51] [cursor=pointer]:
+        - img [ref=e52]
+        - generic [ref=e54]: Bibliothèque
+    - generic [ref=e55]:
+      - generic [ref=e56]: Espace personnel
+      - button "Espace artiste" [ref=e57] [cursor=pointer]:
+        - img [ref=e58]
+        - generic [ref=e61]: Espace artiste
+      - button "Paramètres" [active] [ref=e62] [cursor=pointer]:
+        - img [ref=e63]
+        - generic [ref=e66]: Paramètres
+      - generic [ref=e67]:
+        - img [ref=e68]
+        - generic [ref=e69]:
+          - generic [ref=e70]: Visiteur
+          - generic [ref=e71]: Non connecté
+        - img [ref=e72]
+  - main [ref=e76]:
+    - generic [ref=e77]:
+      - generic [ref=e78]:
+        - img [ref=e79]
+        - textbox "Rechercher un artiste, une œuvre..." [ref=e82]
+        - generic [ref=e83]: ⌘ K
+      - generic [ref=e84]:
+        - button [ref=e85] [cursor=pointer]:
+          - img [ref=e86]
+        - button [ref=e90] [cursor=pointer]:
+          - img [ref=e91]
+        - button "Se connecter" [ref=e94] [cursor=pointer]:
+          - img [ref=e95]
+          - generic [ref=e98]: Se connecter
+    - generic [ref=e292]:
+      - img [ref=e293]
+      - heading "Connectez-vous pour gérer votre compte" [level=2] [ref=e296]
+      - paragraph [ref=e297]: Votre profil et vos préférences seront synchronisés avec Firebase.

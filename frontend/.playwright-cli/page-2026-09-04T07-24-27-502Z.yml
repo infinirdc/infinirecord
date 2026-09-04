@@ -1,0 +1,257 @@
+- generic [ref=e3]:
+  - complementary [ref=e4]:
+    - generic [ref=e7] [cursor=pointer]: infini record
+    - generic [ref=e8]: Explorer
+    - navigation [ref=e9]:
+      - button "Accueil" [ref=e10] [cursor=pointer]:
+        - img [ref=e11]
+        - generic [ref=e14]: Accueil
+      - button "Découvrir" [ref=e15] [cursor=pointer]:
+        - img [ref=e16]
+        - generic [ref=e19]: Découvrir
+      - button "Musique" [ref=e20] [cursor=pointer]:
+        - img [ref=e21]
+        - generic [ref=e24]: Musique
+      - button "Vidéos" [ref=e25] [cursor=pointer]:
+        - img [ref=e26]
+        - generic [ref=e31]: Vidéos
+      - button "Performances" [ref=e32] [cursor=pointer]:
+        - img [ref=e33]
+        - generic [ref=e37]: Performances
+      - button "Artistes" [ref=e38] [cursor=pointer]:
+        - img [ref=e39]
+        - generic [ref=e44]: Artistes
+      - button "Boutique" [ref=e45] [cursor=pointer]:
+        - img [ref=e46]
+        - generic [ref=e49]: Boutique
+      - button "Bibliothèque" [ref=e51] [cursor=pointer]:
+        - img [ref=e52]
+        - generic [ref=e54]: Bibliothèque
+    - generic [ref=e55]:
+      - generic [ref=e56]: Espace personnel
+      - button "Espace artiste" [ref=e57] [cursor=pointer]:
+        - img [ref=e58]
+        - generic [ref=e61]: Espace artiste
+      - button "Paramètres" [ref=e62] [cursor=pointer]:
+        - img [ref=e63]
+        - generic [ref=e66]: Paramètres
+      - generic [ref=e67]:
+        - img [ref=e68]
+        - generic [ref=e69]:
+          - generic [ref=e70]: Visiteur
+          - generic [ref=e71]: Non connecté
+        - img [ref=e72]
+  - main [ref=e76]:
+    - generic [ref=e77]:
+      - generic [ref=e78]:
+        - img [ref=e79]
+        - textbox "Rechercher un artiste, une œuvre..." [ref=e82]
+        - generic [ref=e83]: ⌘ K
+      - generic [ref=e84]:
+        - button [ref=e85] [cursor=pointer]:
+          - img [ref=e86]
+        - button [ref=e90] [cursor=pointer]:
+          - img [ref=e91]
+        - button "Se connecter" [ref=e94] [cursor=pointer]:
+          - img [ref=e95]
+          - generic [ref=e98]: Se connecter
+    - generic [ref=e99]:
+      - generic [ref=e100]:
+        - generic [ref=e101]:
+          - generic [ref=e102]: ÉDITION KINSHASA
+          - heading "L'art congolais n'a pas de limite." [level=1] [ref=e105]:
+            - text: L'art congolais
+            - emphasis [ref=e106]: n'a pas de limite.
+          - paragraph [ref=e107]: Découvrez les voix, les histoires et les talents qui font vibrer l'Afrique.
+          - generic [ref=e108]:
+            - button "Découvrir maintenant" [ref=e109] [cursor=pointer]:
+              - text: Découvrir maintenant
+              - img [ref=e110]
+            - button "Devenir artiste" [ref=e112] [cursor=pointer]
+        - generic [ref=e113]:
+          - img [ref=e115]
+          - generic [ref=e116]: 01 / 04
+          - generic [ref=e117]:
+            - text: « Créer, c'est
+            - text: laisser une trace. »
+      - generic [ref=e118]:
+        - generic [ref=e119]:
+          - text: LA SÉLECTION D'INFINI
+          - heading "En ce moment" [level=2] [ref=e120]
+        - button "Voir tout" [ref=e121] [cursor=pointer]:
+          - text: Voir tout
+          - img [ref=e122]
+      - generic [ref=e124]:
+        - generic [ref=e125]:
+          - img [ref=e126]
+          - generic [ref=e128]:
+            - generic [ref=e129]: À LA UNE
+            - heading "Mokili" [level=3] [ref=e130]
+            - paragraph [ref=e131]: Jérémie Kanda · Album
+            - button [ref=e132] [cursor=pointer]:
+              - img [ref=e133]
+        - generic [ref=e135]:
+          - img [ref=e136]
+          - generic [ref=e138]:
+            - generic [ref=e139]: PERFORMANCE
+            - heading "Vibrations" [level=3] [ref=e140]
+            - paragraph [ref=e141]: Live session · 18 min
+          - button [ref=e142] [cursor=pointer]:
+            - img [ref=e143]
+        - generic [ref=e145]:
+          - img [ref=e146]
+          - generic [ref=e148]:
+            - generic [ref=e149]: À DÉCOUVRIR
+            - heading "Regards croisés" [level=3] [ref=e150]
+            - paragraph [ref=e151]: Exposition numérique
+      - generic [ref=e152]:
+        - generic [ref=e153]:
+          - generic [ref=e154]:
+            - text: POUR VOS OREILLES
+            - heading "Les titres du moment" [level=2] [ref=e155]
+          - button "Tout écouter" [ref=e156] [cursor=pointer]:
+            - text: Tout écouter
+            - img [ref=e157]
+        - generic [ref=e159]:
+          - generic [ref=e160]:
+            - generic [ref=e161]: "01"
+            - img [ref=e162]
+            - generic [ref=e163]:
+              - generic [ref=e164]: Nzela
+              - generic [ref=e165]: Ekenge Musique
+            - generic [ref=e166]: Ekenge
+            - generic [ref=e167]: 82K
+            - generic [ref=e168]: 3:42
+            - button [ref=e169] [cursor=pointer]:
+              - img [ref=e170]
+            - button [ref=e172] [cursor=pointer]:
+              - img [ref=e173]
+          - generic [ref=e175]:
+            - generic [ref=e176]: "02"
+            - img [ref=e177]
+            - generic [ref=e178]:
+              - generic [ref=e179]: Loboko
+              - generic [ref=e180]: Gigi Légendaire
+            - generic [ref=e181]: Légendaire
+            - generic [ref=e182]: 64K
+            - generic [ref=e183]: 4:18
+            - button [ref=e184] [cursor=pointer]:
+              - img [ref=e185]
+            - button [ref=e187] [cursor=pointer]:
+              - img [ref=e188]
+          - generic [ref=e190]:
+            - generic [ref=e191]: "03"
+            - img [ref=e192]
+            - generic [ref=e193]:
+              - generic [ref=e194]: Kinshasa la nuit
+              - generic [ref=e195]: Jock'Afrique
+            - generic [ref=e196]: Jock'Afrique
+            - generic [ref=e197]: 51K
+            - generic [ref=e198]: 3:07
+            - button [ref=e199] [cursor=pointer]:
+              - img [ref=e200]
+            - button [ref=e202] [cursor=pointer]:
+              - img [ref=e203]
+          - generic [ref=e205]:
+            - generic [ref=e206]: "04"
+            - img [ref=e207]
+            - generic [ref=e208]:
+              - generic [ref=e209]: Soki yo te
+              - generic [ref=e210]: Khali Swaga
+            - generic [ref=e211]: Swaga
+            - generic [ref=e212]: 43K
+            - generic [ref=e213]: 3:55
+            - button [ref=e214] [cursor=pointer]:
+              - img [ref=e215]
+            - button [ref=e217] [cursor=pointer]:
+              - img [ref=e218]
+      - generic [ref=e220]:
+        - generic [ref=e221]:
+          - generic [ref=e222]:
+            - text: NOUVELLES VOIX
+            - heading "Artistes à suivre" [level=2] [ref=e223]
+          - button "Explorer" [ref=e224] [cursor=pointer]:
+            - text: Explorer
+            - img [ref=e225]
+        - generic [ref=e227]:
+          - generic [ref=e228]:
+            - img [ref=e229]
+            - generic [ref=e230]:
+              - generic [ref=e231]: Ekenge Musique
+              - generic [ref=e232]: Musique · RDC
+            - button [ref=e233] [cursor=pointer]:
+              - img [ref=e234]
+          - generic [ref=e235]:
+            - img [ref=e236]
+            - generic [ref=e237]:
+              - generic [ref=e238]: Gigi Légendaire
+              - generic [ref=e239]: Artiste · RDC
+            - button [ref=e240] [cursor=pointer]:
+              - img [ref=e241]
+          - generic [ref=e242]:
+            - img [ref=e243]
+            - generic [ref=e244]:
+              - generic [ref=e245]: Jock'Afrique
+              - generic [ref=e246]: Artiste · RDC
+            - button [ref=e247] [cursor=pointer]:
+              - img [ref=e248]
+          - generic [ref=e249]:
+            - img [ref=e250]
+            - generic [ref=e251]:
+              - generic [ref=e252]: Khali Swaga
+              - generic [ref=e253]: Musique · RDC
+            - button [ref=e254] [cursor=pointer]:
+              - img [ref=e255]
+          - generic [ref=e256]:
+            - img [ref=e257]
+            - generic [ref=e258]:
+              - generic [ref=e259]: Nathma
+              - generic [ref=e260]: Artiste · RDC
+            - button [ref=e261] [cursor=pointer]:
+              - img [ref=e262]
+          - generic [ref=e263]:
+            - img [ref=e264]
+            - generic [ref=e265]:
+              - generic [ref=e266]: Star Gondo
+              - generic [ref=e267]: Artiste · RDC
+            - button [ref=e268] [cursor=pointer]:
+              - img [ref=e269]
+          - generic [ref=e270]:
+            - img [ref=e271]
+            - generic [ref=e272]:
+              - generic [ref=e273]: T.I Zoo
+              - generic [ref=e274]: Artiste · RDC
+            - button [ref=e275] [cursor=pointer]:
+              - img [ref=e276]
+          - generic [ref=e277]:
+            - img [ref=e278]
+            - generic [ref=e279]:
+              - generic [ref=e280]: TPS One
+              - generic [ref=e281]: Artiste · RDC
+            - button [ref=e282] [cursor=pointer]:
+              - img [ref=e283]
+      - generic [ref=e284]:
+        - generic [ref=e285]:
+          - text: NOTRE MISSION
+          - heading "Votre écoute change une histoire." [level=2] [ref=e286]:
+            - text: Votre écoute change
+            - text: une
+            - emphasis [ref=e287]: histoire.
+          - paragraph [ref=e288]: Chaque écoute, chaque achat, chaque geste compte pour les artistes indépendants.
+        - button "Soutenir la création" [ref=e289] [cursor=pointer]:
+          - text: Soutenir la création
+          - img [ref=e290]
+  - generic [ref=e293]:
+    - button [ref=e294] [cursor=pointer]:
+      - img [ref=e295]
+    - generic [ref=e300] [cursor=pointer]: infini record
+    - text: BIENVENUE À NOUVEAU
+    - heading "Se connecter" [level=2] [ref=e301]
+    - paragraph [ref=e302]: Retrouvez votre univers musical.
+    - generic [ref=e303]:
+      - textbox "Adresse email" [ref=e304]
+      - textbox "Mot de passe" [ref=e305]
+      - button "Se connecter" [ref=e306] [cursor=pointer]
+    - button "Mot de passe oublié ?" [ref=e307] [cursor=pointer]
+    - button "Continuer avec Google" [ref=e308] [cursor=pointer]
+    - button "Je n'ai pas encore de compte" [ref=e309] [cursor=pointer]
